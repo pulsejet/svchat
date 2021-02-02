@@ -1,22 +1,22 @@
 import { Encoder, Decoder, NNI } from "@ndn/tlv";
 import { Component } from "@ndn/packet";
-import * as t from "./typings";
+import * as T from "./typings";
 
 const TTVersionVector = 201;
 const TTVersionVectorKey = 202;
 const TTVersionVectorValue = 203;
 
 export class VersionVector {
-    private m_map: { [key: string]: t.SeqNo; } = {};
+    private m_map: { [key: string]: T.SeqNo; } = {};
 
     /** Set value of node */
-    public set(nid: t.NodeID, seqNo: t.SeqNo) {
+    public set(nid: T.NodeID, seqNo: T.SeqNo) {
         this.m_map[nid] = seqNo;
         return seqNo
     }
 
     /** Get value of node */
-    public get(nid: t.NodeID) {
+    public get(nid: T.NodeID) {
         return this.m_map[nid] || 0;
     }
 
@@ -66,7 +66,7 @@ export class VersionVector {
     }
 
     /** Get a list of nodes in the vector */
-    public getNodes(): t.NodeID[] {
+    public getNodes(): T.NodeID[] {
         return Object.keys(this.m_map).sort();
     }
 

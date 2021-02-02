@@ -2,7 +2,7 @@ import { FwFace } from "@ndn/fw";
 import { Endpoint, Producer } from "@ndn/endpoint"
 import { Data, Interest, Name } from "@ndn/packet";
 import { VersionVector } from "./version-vector";
-import * as t from './typings';
+import * as T from './typings';
 
 export class Logic {
     private m_endpoint: Endpoint;
@@ -13,8 +13,8 @@ export class Logic {
     constructor (
         private m_face: FwFace,
         private m_syncPrefix: Name,
-        private m_onUpdate: t.UpdateCallback,
-        private m_id: t.NodeID
+        private m_onUpdate: T.UpdateCallback,
+        private m_id: T.NodeID
     ) {
         // Bind async functions
         this.onSyncInterest = this.onSyncInterest.bind(this);
@@ -94,7 +94,7 @@ export class Logic {
         let myVectorNew = false;
         let otherVectorNew = false;
 
-        const missingData: t.MissingDataInfo[] = [];
+        const missingData: T.MissingDataInfo[] = [];
 
         // Check if other vector has newer state
         for (const nid of vvOther.getNodes()) {
@@ -125,7 +125,7 @@ export class Logic {
         return { myVectorNew, otherVectorNew };
     }
 
-    public updateSeqNo(seq: t.SeqNo, nid: t.NodeID = this.m_id): void {
+    public updateSeqNo(seq: T.SeqNo, nid: T.NodeID = this.m_id): void {
         const prev = this.m_vv.get(nid);
         this.m_vv.set(nid, seq);
 
@@ -133,7 +133,7 @@ export class Logic {
             this.sendSyncInterest();
     }
 
-    public getSeqNo(nid: t.NodeID = this.m_id) {
+    public getSeqNo(nid: T.NodeID = this.m_id) {
         return this.m_vv.get(nid);
     }
 }

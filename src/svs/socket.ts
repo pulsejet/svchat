@@ -3,22 +3,22 @@ import { FwFace } from "@ndn/fw";
 import { TT, Component, Data, Interest, Name } from "@ndn/packet";
 import { Encoder, NNI } from "@ndn/tlv";
 import { Logic } from "./logic";
-import * as t from './typings';
+import * as T from './typings';
 
 export class Socket {
     private m_endpoint: Endpoint;
     private m_syncPrefix: Name;
     private m_dataPrefix: Name;
-    private m_id: t.NodeID;
+    private m_id: T.NodeID;
     private m_registeredDataPrefix: Producer;
     private m_ims: { [key: string]: Data; } = {};
     private m_logic: Logic;
 
     constructor(
         syncPrefix: Name,
-        id: t.NodeID,
+        id: T.NodeID,
         private m_face: FwFace,
-        m_updateCallback: t.UpdateCallback,
+        m_updateCallback: T.UpdateCallback,
     ) {
         // Bind async functions
         this.onDataInterest = this.onDataInterest.bind(this);
@@ -47,7 +47,7 @@ export class Socket {
         return this.m_ims[interest.name.toString()] || undefined;
     }
 
-    public publishData(content: Uint8Array, freshness: number, seqNo: t.SeqNo = -1): void {
+    public publishData(content: Uint8Array, freshness: number, seqNo: T.SeqNo = -1): void {
         const data = new Data();
         data.content = content;
         data.freshnessPeriod = freshness;
@@ -63,7 +63,7 @@ export class Socket {
         this.m_logic.updateSeqNo(seqNo, this.m_id);
     }
 
-    public fetchData(nid: t.NodeID, seqNo: t.SeqNo) {
+    public fetchData(nid: T.NodeID, seqNo: T.SeqNo) {
         const interestName = new Name(this.m_dataPrefix)
                             .append(nid)
                             .append(this.getNNIComponent(seqNo))
