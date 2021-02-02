@@ -1,6 +1,6 @@
-import * as t from "./types";
-import { Encoder, Decoder, EvDecoder, NNI } from "@ndn/tlv";
+import { Encoder, Decoder, NNI } from "@ndn/tlv";
 import { Component } from "@ndn/packet";
+import * as t from "./typings";
 
 const TTVersionVector = 201;
 const TTVersionVectorKey = 202;

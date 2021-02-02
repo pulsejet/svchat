@@ -2,7 +2,7 @@ import { FwFace } from "@ndn/fw";
 import { Endpoint, Producer } from "@ndn/endpoint"
 import { Data, Interest, Name } from "@ndn/packet";
 import { VersionVector } from "./version-vector";
-import * as t from './types';
+import * as t from './typings';
 
 export class Logic {
     private m_endpoint: Endpoint;

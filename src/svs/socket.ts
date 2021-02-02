@@ -3,7 +3,7 @@ import { FwFace } from "@ndn/fw";
 import { TT, Component, Data, Interest, Name } from "@ndn/packet";
 import { Encoder, NNI } from "@ndn/tlv";
 import { Logic } from "./logic";
-import * as t from './types';
+import * as t from './typings';
 
 export class Socket {
     private m_endpoint: Endpoint;
