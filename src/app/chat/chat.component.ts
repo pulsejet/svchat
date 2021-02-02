@@ -1,10 +1,9 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Endpoint } from '@ndn/endpoint';
 import { FwFace } from '@ndn/fw';
 import { Name } from "@ndn/packet";
 import { enableNfdPrefixReg } from "@ndn/nfdmgmt";
 import { WsTransport } from "@ndn/ws-transport";
-import * as svs from '../../svs/socket';
+import { Socket } from 'ndnts-svs';
 
 @Component({
   selector: 'app-chat',
@@ -12,46 +11,42 @@ import * as svs from '../../svs/socket';
   styleUrls: ['./chat.component.css']
 })
 export class ChatComponent implements OnInit, OnDestroy {
-
   face: FwFace | null = null;
-  sock: svs.Socket | null = null;
-  endpoint: Endpoint | null = null;
+  sock: Socket | null = null;
 
   constructor() {}
 
   async ngOnInit() {
-    this.face = await WsTransport.createFace({}, "ws://localhost:9696");
+    // Connect to websocket transport
+    const face = await WsTransport.createFace({}, "ws://localhost:9696");
+    this.face = face;
     console.warn('Connected to NFD successfully!');
-    await this.produceData();
-  }
 
-  async produceData() {
-    enableNfdPrefixReg(this.face as any);
+    // Enable prefix registration
+    enableNfdPrefixReg(face);
 
-    this.sock = new svs.Socket(new Name('/ndn/svs'), 'dog', this.face as any, (missingData) => {
+    // Sync prefix
+    const prefix = new Name('/ndn/svs');
+
+    this.sock = new Socket(prefix, 'dog', face, (missingData) => {
       // For each node
       for (const m of missingData) {
         // Fetch at most last five messages
         for (let i = Math.max(m.high - 5, m.low); i <= m.high; i++) {
           this.sock?.fetchData(m.session, i).then((data) => {
             const msg = new TextDecoder().decode(data.content);
-            console.log(`${m.session} => ${msg}`);
-          }).catch((err) => {
-            console.warn(`Could not get data nid=${m.session} => ${i}`);
-          });
+            this.newMessage(m.session, msg);
+          }).catch();
         }
       }
     });
+  }
 
-    let k = 1;
-    setInterval(() => {
-      this.sock?.publishData(new TextEncoder().encode('Hello from the web ' + k), 1000);
-      k++;
-    }, 3000);
+  newMessage(sender: string, message: string) {
+    console.log(`${sender} => ${message}`);
   }
 
   ngOnDestroy(): void {
-    this.sock?.close();
     this.face?.close();
   }
 }
