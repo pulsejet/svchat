@@ -1,7 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Endpoint } from '@ndn/endpoint';
-import { Forwarder, FwFace } from '@ndn/fw';
-import { Data, Interest, Name } from "@ndn/packet";
+import { FwFace } from '@ndn/fw';
+import { Name } from "@ndn/packet";
+import { enableNfdPrefixReg } from "@ndn/nfdmgmt";
 import { WsTransport } from "@ndn/ws-transport";
 import * as svs from '../../svs/socket';
 
@@ -25,26 +26,17 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   async produceData() {
-    console.log(Forwarder.getDefault().faces);
+    enableNfdPrefixReg(this.face as any);
 
-    this.face?.addRoute(new Name('/ndn/svs/s'));
-    this.face?.addRoute(new Name('/ndn/svs/d'));
-
-    this.endpoint = new Endpoint({
-      fw: this.face?.fw,
-    } as any);
-
-    this.endpoint.produce('/ndn/alice', async (interest: Interest) => {
-      console.log('GOT AN INTEREST', interest.name.toString());
-      return new Data(interest.name, new Uint8Array([2, 3, 22]));
+    this.sock = new svs.Socket(new Name('/ndn/svs'), 'dog', this.face as any, (t) => {
+      console.log(t);
     });
 
-    const data = await this.endpoint.consume('/ndn/alice/bleh')
-    console.log('GOT MY DATA: ', data.content);
-
-    this.sock = new svs.Socket(new Name('/ndn/svs'), 'dog', this.endpoint, (t) => {
-      console.log(t);
-    })
+    let k = 1;
+    setInterval(() => {
+      this.sock?.publishData(new TextEncoder().encode('Hello from the web ' + k), 1000);
+      k++;
+    }, 3000);
   }
 
   ngOnDestroy(): void {
