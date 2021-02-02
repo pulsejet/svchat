@@ -11,4 +11,4 @@ export type MissingDataInfo = {
 };
 
 /** Callback when new data is discovered */
-export type UpdateCallback = (info: MissingDataInfo) => void;
+export type UpdateCallback = (info: MissingDataInfo[]) => void;

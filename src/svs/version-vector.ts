@@ -24,7 +24,7 @@ export class VersionVector {
     private encoder(): Encoder {
         let enc = new Encoder();
 
-        for (const key of Object.keys(this.m_map).sort().reverse()) {
+        for (const key of this.getNodes().reverse()) {
             enc.prependTlv(TTVersionVectorValue, NNI(this.m_map[key]));
             enc.prependTlv(TTVersionVectorKey, new TextEncoder().encode(key));
         }
@@ -65,10 +65,15 @@ export class VersionVector {
         return vv;
     }
 
+    /** Get a list of nodes in the vector */
+    public getNodes(): t.NodeID[] {
+        return Object.keys(this.m_map).sort();
+    }
+
     /** Get a human readable representation */
     public toStr(): string {
         let str = '';
-        for (const key of Object.keys(this.m_map).sort()) {
+        for (const key of this.getNodes()) {
             str += key + '_' + this.m_map[key] + '_';
         }
         return str;

@@ -34,7 +34,6 @@ export class Logic {
     }
 
     private async onSyncInterest(interest: Interest) {
-        console.log('onSyncInterest')
         const encodedVV = interest.name.get(-1)?.tlv as Uint8Array;
         if (!encodedVV) return;
 
@@ -66,7 +65,42 @@ export class Logic {
 
         // Try decoding the received version vector
         const newVV = VersionVector.from(data.content) as VersionVector;
-        if (!newVV) return;
+        if (newVV) this.mergeStateVector(newVV);
+    }
+
+    private mergeStateVector(vvOther: VersionVector) {
+        let myVectorNew = false;
+        let otherVectorNew = false;
+
+        const missingData: t.MissingDataInfo[] = [];
+
+        // Check if other vector has newer state
+        for (const nid of vvOther.getNodes()) {
+            const seqSelf = this.m_vv.get(nid);
+            const seqOther = vvOther.get(nid);
+
+            if (seqSelf < seqOther) {
+                otherVectorNew = true;
+                missingData.push({ session: nid, low: seqSelf, high: seqOther });
+                this.m_vv.set(nid, seqOther);
+            }
+        }
+
+        // Callback if missing data
+        if (missingData.length > 0) this.m_onUpdate(missingData);
+
+        // Check if current version vector has new state
+        for (const nid of this.m_vv.getNodes()) {
+            const seq = this.m_vv.get(nid);
+            const seqOther = vvOther.get(nid);
+
+            if (seqOther < seq) {
+                myVectorNew = true;
+                break;
+            }
+        }
+
+        return { myVectorNew, otherVectorNew };
     }
 
     public updateSeqNo(seq: t.SeqNo, nid: t.NodeID = this.m_id): void {
