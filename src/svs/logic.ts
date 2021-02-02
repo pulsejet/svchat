@@ -14,7 +14,6 @@ export class Logic {
         private m_face: FwFace,
         private m_syncPrefix: Name,
         private m_onUpdate: t.UpdateCallback,
-        private m_signingId: Name,
         private m_id: t.NodeID
     ) {
         // Bind async functions
@@ -31,6 +30,11 @@ export class Logic {
 
         // Start periodically send sync interest
         this.retxSyncInterest();
+    }
+
+    public close() {
+        this.m_syncRegisteredPrefix.close();
+        this.m_face.removeRoute(this.m_syncPrefix);
     }
 
     private async onSyncInterest(interest: Interest) {

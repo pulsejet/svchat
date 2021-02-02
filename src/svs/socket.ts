@@ -18,8 +18,7 @@ export class Socket {
         syncPrefix: Name,
         id: t.NodeID,
         private m_face: FwFace,
-        private m_updateCallback: t.UpdateCallback,
-        private m_signingId = new Name(),
+        m_updateCallback: t.UpdateCallback,
     ) {
         // Bind async functions
         this.onDataInterest = this.onDataInterest.bind(this);
@@ -32,12 +31,16 @@ export class Socket {
 
         // Create Logic
         this.m_logic = new Logic(
-            this.m_face, this.m_syncPrefix, m_updateCallback,
-            m_signingId, this.m_id);
+            this.m_face, this.m_syncPrefix, m_updateCallback, this.m_id);
 
         // Register data prefix
         this.m_face.addRoute(this.m_dataPrefix);
         this.m_registeredDataPrefix = this.m_endpoint.produce(this.m_dataPrefix, this.onDataInterest);
+    }
+
+    public close() {
+        this.m_registeredDataPrefix.close();
+        this.m_face.removeRoute(this.m_dataPrefix);
     }
 
     private async onDataInterest(interest: Interest) {
