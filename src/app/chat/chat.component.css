@@ -1,0 +1,67 @@
+.outer {
+    height: 100%;
+}
+
+.chatbox {
+    font-family: sans-serif;
+    padding: 5px;
+    height: calc(100% - 54px);
+    overflow-y: scroll;
+}
+
+.block {
+    display: block;
+    width: 100%;
+}
+
+.inner-block {
+    background-color: rgb(239, 241, 240);
+    display: inline-block;
+    width: auto;
+    padding: 8px 10px;
+    margin: 3px;
+    border-radius: 16px;
+    max-width: 45%;
+}
+
+.block.self {
+    text-align: right;
+}
+.block.self .inner-block {
+    background-color: rgb(179, 69, 223);
+    color: white;
+}
+
+.block.self .sender {
+    display: none;
+}
+
+.sender {
+    color: darkblue;
+    font-weight: bold;
+}
+.sender::after {
+    content: ": ";
+}
+
+input[type=text], .send-button {
+    width: 100%;
+    padding: 6px 6px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 1em;
+}
+
+.type-box {
+    width: calc(100% - 80px) !important;
+}
+
+.send-button {
+    width: 70px !important;
+    padding: 5px 10px;
+    margin: 8px 5px;
+    cursor: pointer;
+}

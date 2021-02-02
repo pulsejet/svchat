@@ -1,1 +1,15 @@
-<p>chat works!</p>
+<div class="outer">
+    <div class="chatbox" #scrollframe>
+        <div *ngFor="let message of messages" class="block" [class.self]="message.nid === nodeId">
+            <div class="inner-block" title="#{{ message.seq }}">
+                <span class="sender">{{ message.nid }}</span>
+                <span class="message">{{ message.msg }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="typingbox">
+        <input class="type-box" [(ngModel)]="typedMessage" (keyup.enter)="sendMessage()" type="text">
+        <button class="send-button" (click)="sendMessage()">Send</button>
+    </div>
+</div>
