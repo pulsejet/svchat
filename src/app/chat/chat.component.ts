@@ -4,6 +4,7 @@ import { Name } from "@ndn/packet";
 import { enableNfdPrefixReg } from "@ndn/nfdmgmt";
 import { WsTransport } from "@ndn/ws-transport";
 import { Socket } from 'ndnts-svs';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-chat',
@@ -14,7 +15,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   face: FwFace | null = null;
   sock: Socket | null = null;
 
-  syncPrefix = '/ndn/svs';
+  public syncPrefix: string = '';
   public nodeId = 'dog';
 
   typedMessage = '';
@@ -28,10 +29,30 @@ export class ChatComponent implements OnInit, OnDestroy {
   }[] = [];
 
   constructor(
-    private cdr: ChangeDetectorRef
-  ) {}
+    private cdr: ChangeDetectorRef,
+    private route: ActivatedRoute,
+  ) {
+    this.startRoom = this.startRoom.bind(this);
+  }
 
-  async ngOnInit() {
+  ngOnInit() {
+    this.route.params.subscribe((params) => {
+      this.syncPrefix = decodeURIComponent(params['prefix']);
+
+      if (!this.syncPrefix) {
+        alert('Invalid sync prefix');
+      } else {
+        this.startRoom();
+      }
+    });
+  }
+
+  private async startRoom() {
+    // Close any existing chat
+    this.face?.close();
+    this.messages = [];
+    this.typedMessage = '';
+
     // Connect to websocket transport
     const face = await WsTransport.createFace({}, "ws://localhost:9696");
     this.face = face;
@@ -66,11 +87,13 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   newMessage(nid: string, msg: string, seq: number) {
+    const scrollContainer = this.scrollFrame.nativeElement;
+    const wasAtBottom = this.isUserNearBottom(scrollContainer);
+
     this.messages.push({ nid, msg, seq });
     this.cdr.detectChanges();
 
-    const scrollContainer = this.scrollFrame.nativeElement;
-    if (this.isUserNearBottom(scrollContainer)) {
+    if (wasAtBottom) {
       scrollContainer.scroll({
         top: this.scrollFrame.nativeElement.scrollHeight,
         left: 0,

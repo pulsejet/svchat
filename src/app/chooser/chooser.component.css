@@ -1,0 +1,7 @@
+ul {
+    color: silver;
+    font-size: 1.1em;
+    word-wrap: break-word;
+    margin-right: 15px;
+    cursor: pointer;
+}

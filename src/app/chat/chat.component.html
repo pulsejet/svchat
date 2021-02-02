@@ -1,4 +1,5 @@
 <div class="outer">
+    <div class="title">{{ nodeId }} - {{ syncPrefix }}</div>
     <div class="chatbox" #scrollframe>
         <div *ngFor="let message of messages" class="block" [class.self]="message.nid === nodeId">
             <div class="inner-block" title="#{{ message.seq }}">
