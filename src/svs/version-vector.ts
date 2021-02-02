@@ -1,5 +1,6 @@
 import * as t from "./types";
 import { Encoder, Decoder, EvDecoder, NNI } from "@ndn/tlv";
+import { Component } from "@ndn/packet";
 
 const TTVersionVector = 201;
 const TTVersionVectorKey = 202;
@@ -7,24 +8,28 @@ const TTVersionVectorValue = 203;
 
 export class VersionVector {
     private m_map: { [key: string]: t.SeqNo; } = {};
-    public static TT = TTVersionVector;
 
-    set(nid: t.NodeID, seqNo: t.SeqNo) {
+    public set(nid: t.NodeID, seqNo: t.SeqNo) {
         this.m_map[nid] = seqNo;
         return seqNo
     }
 
-    get(nid: t.NodeID) {
+    public get(nid: t.NodeID) {
         return this.m_map[nid] || 0;
     }
 
-    encode(): Uint8Array {
-        let encoder = new Encoder();
+    private encoder(): Encoder {
+        let enc = new Encoder();
+
         for (const key of Object.keys(this.m_map).sort().reverse()) {
-            encoder.prependTlv(TTVersionVectorValue, NNI(this.m_map[key]));
-            encoder.prependTlv(TTVersionVectorKey, new TextEncoder().encode(key));
+            enc.prependTlv(TTVersionVectorValue, NNI(this.m_map[key]));
+            enc.prependTlv(TTVersionVectorKey, new TextEncoder().encode(key));
         }
 
-        return encoder.output;
+        return enc;
+    }
+
+    public encodeToComponent(): Component {
+        return new Component(TTVersionVector, this.encoder().output);
     }
 }

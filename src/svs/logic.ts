@@ -41,8 +41,7 @@ export class Logic {
     private async sendSyncInterest() {
         console.log('sending sync interest');
 
-        const syncName = this.m_syncPrefix
-            .append(new Component(VersionVector.TT, this.m_vv.encode()));
+        const syncName = this.m_syncPrefix.append(this.m_vv.encodeToComponent());
 
         const interest = new Interest(syncName);
         interest.canBePrefix = true;
