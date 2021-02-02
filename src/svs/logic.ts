@@ -37,14 +37,32 @@ export class Logic {
         const encodedVV = interest.name.get(-1)?.tlv as Uint8Array;
         if (!encodedVV) return;
 
-        const vv = VersionVector.from(encodedVV) as VersionVector;
-        if (!vv) return;
+        const vvOther = VersionVector.from(encodedVV) as VersionVector;
+        if (!vvOther) return;
+
+        const mergeRes = this.mergeStateVector(vvOther);
+
+        // Suppress if nothing new
+        if (!mergeRes.myVectorNew && !mergeRes.otherVectorNew)
+            this.retxSyncInterest(false);
+
+        // Send sync interest if other vector new
+        else if (mergeRes.otherVectorNew)
+            this.retxSyncInterest();
+
+        // Return reply if my vector is new
+        if (mergeRes.myVectorNew) {
+            const data = new Data(interest.name);
+            data.content = this.m_vv.encodeToComponent().tlv;
+            data.freshnessPeriod = 4000;
+            return data;
+        }
 
         return undefined;
     }
 
-    private retxSyncInterest() {
-        this.sendSyncInterest();
+    private retxSyncInterest(send = true) {
+        if (send) this.sendSyncInterest();
         clearTimeout(this.m_retxEvent);
         this.m_retxEvent = setTimeout(this.retxSyncInterest.bind(this), 3000);
     }
