@@ -99,7 +99,7 @@ export class Logic {
 
             if (seqSelf < seqOther) {
                 otherVectorNew = true;
-                missingData.push({ session: nid, low: seqSelf, high: seqOther });
+                missingData.push({ session: nid, low: seqSelf + 1, high: seqOther });
                 this.m_vv.set(nid, seqOther);
             }
         }

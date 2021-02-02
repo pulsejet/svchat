@@ -28,8 +28,19 @@ export class ChatComponent implements OnInit, OnDestroy {
   async produceData() {
     enableNfdPrefixReg(this.face as any);
 
-    this.sock = new svs.Socket(new Name('/ndn/svs'), 'dog', this.face as any, (t) => {
-      console.log(t);
+    this.sock = new svs.Socket(new Name('/ndn/svs'), 'dog', this.face as any, (missingData) => {
+      // For each node
+      for (const m of missingData) {
+        // Fetch at most last five messages
+        for (let i = Math.max(m.high - 5, m.low); i <= m.high; i++) {
+          this.sock?.fetchData(m.session, i).then((data) => {
+            const msg = new TextDecoder().decode(data.content);
+            console.log(`${m.session} => ${msg}`);
+          }).catch((err) => {
+            console.warn(`Could not get data nid=${m.session} => ${i}`);
+          });
+        }
+      }
     });
 
     let k = 1;

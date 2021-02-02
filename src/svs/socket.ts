@@ -52,14 +52,29 @@ export class Socket {
         if (seqNo < 0)
             seqNo = this.m_logic.getSeqNo(this.m_id) + 1;
 
-        let encoder = new Encoder();
-        encoder.encode(NNI(seqNo));
-
         data.name = new Name(this.m_dataPrefix)
                     .append(this.m_id)
-                    .append(new Component(TT.GenericNameComponent, encoder.output));
+                    .append(this.getNNIComponent(seqNo));
 
         this.m_ims[data.name.toString()] = data;
         this.m_logic.updateSeqNo(seqNo, this.m_id);
+    }
+
+    public fetchData(nid: t.NodeID, seqNo: t.SeqNo) {
+        const interestName = new Name(this.m_dataPrefix)
+                            .append(nid)
+                            .append(this.getNNIComponent(seqNo))
+        const interest = new Interest(interestName, Interest.MustBeFresh);
+        return this.m_endpoint.consume(interest);
+    }
+
+    private getNNIComponent(num: number) {
+        let encoder = new Encoder();
+        encoder.encode(NNI(num));
+        return new Component(TT.GenericNameComponent, encoder.output);
+    }
+
+    public getLogic() {
+        return this.m_logic;
     }
 }
