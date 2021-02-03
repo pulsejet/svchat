@@ -16,3 +16,20 @@
     height: 100vh;
     box-sizing: border-box;
 }
+
+@media (max-width: 1200px) {
+    .chooser {
+        font-size: 0.85em;
+    }
+}
+
+@media (max-width: 900px) {
+    .chooser {
+        display: none;
+    }
+
+    .content {
+        left: 0;
+        width: 100vw;
+    }
+}

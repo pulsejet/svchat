@@ -50,6 +50,10 @@
     text-align: left;
 }
 
+.message {
+    word-wrap: break-word;
+}
+
 .block.self .sender {
     display: none;
 }
