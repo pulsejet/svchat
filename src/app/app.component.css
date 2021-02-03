@@ -7,6 +7,8 @@
     box-shadow: 0 0px 5px -2px black;
     color: black;
     z-index: 500;
+    font-size: 0.9em;
+    transition: transform 0.3s ease;
 }
 
 .content {
@@ -17,19 +19,59 @@
     box-sizing: border-box;
 }
 
+.hamburger {
+    display: none;
+    font-size: 2em;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    position: fixed;
+    z-index: 300;
+    top: 5px; left: 15px;
+}
+
+.chooser-bg {
+    display: none;
+    background-color: black;
+    opacity: 0.2;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    z-index: 300;
+}
+
 @media (max-width: 1200px) {
     .chooser {
-        font-size: 0.85em;
+        width: 25vw;
+    }
+
+    .content {
+        left: 25vw;
+        width: 75vw;
     }
 }
 
 @media (max-width: 900px) {
     .chooser {
-        display: none;
+        transform: translateZ(0) translateX(-100%);
+        width: 100vw;
+        max-width: 300px;
+    }
+
+    .chooser.open {
+        transform: translateX(0);
+    }
+
+    .chooser-bg.open {
+        display: block;
     }
 
     .content {
         left: 0;
         width: 100vw;
+    }
+
+    .hamburger {
+        display: block;
     }
 }

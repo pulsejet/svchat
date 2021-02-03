@@ -7,4 +7,9 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'svchat';
+  menuOpen = false;
+
+  toggleMenu(open: boolean) {
+    this.menuOpen = open;
+  }
 }

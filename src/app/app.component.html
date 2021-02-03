@@ -1,6 +1,12 @@
-<div class="chooser">
+<div class="hamburger" (click)="toggleMenu(true)">
+    <span>&#8801;</span>
+</div>
+
+<div class="chooser" [class.open]="menuOpen">
     <app-chooser></app-chooser>
 </div>
+
+<div class="chooser-bg" (click)="toggleMenu(false)" [class.open]="menuOpen"></div>
 
 <div class="content">
     <router-outlet></router-outlet>
