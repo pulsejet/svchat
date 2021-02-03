@@ -1,7 +1,26 @@
 ul {
-    color: silver;
     font-size: 1.1em;
     word-wrap: break-word;
-    margin-right: 15px;
     cursor: pointer;
+    padding: 0;
+}
+
+li {
+    padding: 10px 15px;
+    list-style-type: none;
+}
+
+li:hover {
+    background-color: rgb(215, 215, 215);;;
+}
+
+.header {
+    padding: 20px;
+    font-size: 1.3em;
+    font-weight: bold;
+    background-color: #6200EE;
+    height: 60px;
+    box-sizing: border-box;
+    box-shadow: 0 0px 10px -5px black;
+    color: white;
 }
