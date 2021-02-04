@@ -64,8 +64,8 @@ export class ChatComponent implements OnInit, OnDestroy {
     // Sync prefix
     const prefix = new Name(this.syncPrefix);
 
-    // Start SVS socket
-    this.sock = new Socket(prefix, this.nodeId, face, (missingData) => {
+    // Missing data callback
+    const updateCallback = (missingData) => {
       // For each node
       for (const m of missingData) {
         // Fetch at most last five messages
@@ -76,6 +76,14 @@ export class ChatComponent implements OnInit, OnDestroy {
           }).catch(() => {});
         }
       }
+    };
+
+    // Start SVS socket
+    this.sock = new Socket({
+      face: face,
+      prefix: prefix,
+      id: this.nodeId,
+      update: updateCallback,
     });
   }
 
