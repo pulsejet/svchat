@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit, ChangeDetectorRef, ElementRef, ViewChild } from '@angular/core';
 import { FwFace } from '@ndn/fw';
 import { Name } from "@ndn/packet";
+import { fromHex } from "@ndn/tlv";
 import { enableNfdPrefixReg } from "@ndn/nfdmgmt";
 import { WsTransport } from "@ndn/ws-transport";
 import { Socket } from 'ndnts-svs';
@@ -84,6 +85,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       prefix: prefix,
       id: this.nodeId,
       update: updateCallback,
+      syncKey: fromHex("74686973206973206120736563726574206d657373616765"),
     });
   }
 
