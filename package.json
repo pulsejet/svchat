@@ -23,7 +23,7 @@
     "@ndn/fw": "https://ndnts-nightly.ndn.today/fw.tgz",
     "@ndn/nfdmgmt": "https://ndnts-nightly.ndn.today/nfdmgmt.tgz",
     "@ndn/ws-transport": "https://ndnts-nightly.ndn.today/ws-transport.tgz",
-    "localforage": "^1.9.0",
+    "dexie": "^3.0.3",
     "ndnts-svs": "file:../ndnts-svs",
     "rxjs": "~6.6.0",
     "tslib": "^2.0.0",

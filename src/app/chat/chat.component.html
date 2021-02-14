@@ -1,10 +1,10 @@
 <div class="outer">
     <div class="title">{{ nodeId }} - {{ syncPrefix }}</div>
     <div class="chatbox" #scrollframe>
-        <div *ngFor="let message of messages" class="block" [class.self]="message.nid === nodeId">
-            <div class="inner-block" title="#{{ message.seq }}">
-                <span class="sender">{{ message.nid }}</span>
-                <span class="message">{{ message.msg }}</span>
+        <div *ngFor="let entry of messages" class="block" [class.self]="entry.nid === nodeId">
+            <div class="inner-block" title="#{{ entry.seq }}">
+                <span class="sender">{{ entry.nid }}</span>
+                <span class="message">{{ entry.message }}</span>
             </div>
         </div>
     </div>

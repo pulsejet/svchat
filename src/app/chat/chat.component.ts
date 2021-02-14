@@ -9,7 +9,7 @@ import { enableNfdPrefixReg } from "@ndn/nfdmgmt";
 import { WsTransport } from "@ndn/ws-transport";
 import { Socket, VersionVector } from 'ndnts-svs';
 
-import { ForageDataStore } from '../forage-store';
+import { DataInterface, DexieDataStore, StoreEntry } from '../dexie-store';
 
 @Component({
   selector: 'app-chat',
@@ -19,7 +19,7 @@ import { ForageDataStore } from '../forage-store';
 export class ChatComponent implements OnInit, OnDestroy {
   private face: FwFace | null = null;
   private sock: Socket | null = null;
-  private forageStore?: ForageDataStore;
+  private store?: DexieDataStore;
 
   public syncPrefix: string = '';
   public nodeId = 'dog';
@@ -28,11 +28,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   @ViewChild('scrollframe', {static: false}) scrollFrame: ElementRef;
 
-  public messages: {
-    nid: string,
-    msg: string,
-    seq: number,
-  }[] = [];
+  public messages: StoreEntry[] = [];
 
   constructor(
     private cdr: ChangeDetectorRef,
@@ -73,32 +69,48 @@ export class ChatComponent implements OnInit, OnDestroy {
     // Fetch data for a node
     const fetchData = (nid: string, seq: number) => {
       this.sock?.fetchData(nid, seq).then((data) => {
-        const msg = new TextDecoder().decode(data.content);
-        this.newMessage(nid, msg, seq);
+        this.newMessage(DataInterface.parseData(data));
       }).catch(console.error);
     };
 
     // Missing data callback
     const updateCallback = (missingData) => {
       // Store the version vector
-      this.forageStore.store.setItem('vv', this.sock.m_logic.m_vv.encodeToComponent().tlv);
+      this.store.db.table('meta').put({
+        key: 'vv',
+        blob: this.sock.m_logic.m_vv.encodeToComponent().tlv,
+      }, 'vv');
 
       // For each node
       for (const m of missingData) {
-        // Fetch at most last five messages
-        for (let i = Math.max(m.high - 5, m.low); i <= m.high; i++) {
+        for (let i = m.low; i <= m.high; i++) {
           fetchData(m.session, i);
         }
       }
     };
 
     // Set up data store
-    this.forageStore = new ForageDataStore(this.syncPrefix);
+    this.store = new DexieDataStore(this.syncPrefix);
 
     // Get the version vector
     let initialVV: VersionVector = undefined;
-    const vvWire: Uint8Array = await this.forageStore.store.getItem('vv');
-    if (vvWire) initialVV = VersionVector.from(vvWire);
+    const vvWire = await this.store.db.table('meta').get('vv');
+    if (vvWire) initialVV = VersionVector.from(vvWire.blob);
+
+    // Get last few messages
+    if (initialVV) {
+      const entries = await this.store?.db.table(DexieDataStore.TABLE)
+        .orderBy('time').reverse()
+        .limit(100).toArray();
+
+      entries.forEach((e) => {
+        this.messages.push(e);
+      });
+
+      this.messages.sort((a, b) => a.time - b.time);
+      this.cdr.detectChanges();
+      this.scrollToBottom();
+    }
 
     // Start SVS socket
     this.sock = new Socket({
@@ -107,19 +119,10 @@ export class ChatComponent implements OnInit, OnDestroy {
       id: this.nodeId,
       update: updateCallback,
       syncKey: fromHex("74686973206973206120736563726574206d657373616765"),
-      dataStore: this.forageStore,
+      dataStore: this.store,
       cacheAll: true,
       initialVersionVector: initialVV,
     });
-
-    // Get all existing data
-    if (initialVV) {
-      for (const n of initialVV.getNodes()) {
-        for (let i = 1; i <= initialVV.get(n); i++) {
-          fetchData(n, i);
-        }
-      }
-    }
   }
 
   private isUserNearBottom(scrollContainer: any): boolean {
@@ -129,27 +132,52 @@ export class ChatComponent implements OnInit, OnDestroy {
     return position > height - threshold;
   }
 
-  newMessage(nid: string, msg: string, seq: number) {
+  newMessage(entry: StoreEntry) {
     const scrollContainer = this.scrollFrame.nativeElement;
     const wasAtBottom = this.isUserNearBottom(scrollContainer);
 
-    this.messages.push({ nid, msg, seq });
+    this.insertEntry(entry);
     this.cdr.detectChanges();
 
     if (wasAtBottom) {
+      this.scrollToBottom();
+    }
+  }
+
+  insertEntry(e: StoreEntry) {
+    if (this.messages.filter(m => m.name === e.name).length > 0) return;
+
+    const location = (start = 0, end = this.messages.length) => {
+      const pivot = Math.floor(start + (end - start) / 2);
+      if (end - start <= 1 || this.messages[pivot].time === e.time) return pivot;
+      if (this.messages[pivot].time < e.time) {
+        return location(pivot, end);
+      } else {
+        return location(start, pivot);
+      }
+    }
+    this.messages.splice(location() + 1, 0, e);
+  }
+
+  scrollToBottom() {
+    setTimeout(() => {
+      const scrollContainer = this.scrollFrame.nativeElement;
       scrollContainer.scroll({
         top: this.scrollFrame.nativeElement.scrollHeight,
         left: 0,
-        behavior: 'smooth',
       });
-    }
+    }, 0);
   }
 
   sendMessage() {
     if (!this.typedMessage) return;
-    this.sock?.publishData(new TextEncoder().encode(this.typedMessage), 4000);
-    this.newMessage(this.nodeId, this.typedMessage, (<Socket>this.sock).m_logic.getSeqNo());
-    this.typedMessage = '';
+    this.sock?.publishData(DataInterface.makeData({
+      msg: this.typedMessage,
+    }), 4000).then((data) => {
+      this.newMessage(DataInterface.parseData(data));
+      this.typedMessage = '';
+      this.scrollToBottom();
+    });
   }
 
   ngOnDestroy(): void {
