@@ -4,7 +4,7 @@ import { ChatComponent } from './chat/chat.component';
 import { CreateComponent } from './create/create.component';
 
 const routes: Routes = [
-  { path: 'chat/:prefix', component: ChatComponent },
+  { path: 'chat/:room', component: ChatComponent },
   { path: 'new', component: CreateComponent },
   { path: '**', redirectTo: '/new', pathMatch: 'full' },
 ];

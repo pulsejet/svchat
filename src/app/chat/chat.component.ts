@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, ChangeDetectorRef, ElementRef, ViewChild } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { FwFace } from '@ndn/fw';
 import { Name } from "@ndn/packet";
@@ -10,6 +10,7 @@ import { WsTransport } from "@ndn/ws-transport";
 import { Socket, VersionVector } from 'ndnts-svs';
 
 import { DataInterface, DexieDataStore, StoreEntry } from '../dexie-store';
+import { ChatRoomInfo, TrackerService } from '../tracker.service';
 
 @Component({
   selector: 'app-chat',
@@ -21,8 +22,10 @@ export class ChatComponent implements OnInit, OnDestroy {
   private sock: Socket | null = null;
   private store?: DexieDataStore;
 
-  public syncPrefix: string = '';
-  public nodeId = 'dog';
+  public syncPrefix: string;
+  public nodeId: string;
+
+  public room: ChatRoomInfo;
 
   typedMessage = '';
 
@@ -33,13 +36,22 @@ export class ChatComponent implements OnInit, OnDestroy {
   constructor(
     private cdr: ChangeDetectorRef,
     private route: ActivatedRoute,
+    private router: Router,
+    private trackerService: TrackerService,
   ) {
     this.startRoom = this.startRoom.bind(this);
   }
 
   ngOnInit() {
     this.route.params.subscribe((params) => {
-      this.syncPrefix = decodeURIComponent(params['prefix']);
+      this.room = this.trackerService.getRoom(params['room']);
+      if (!this.room) {
+        this.router.navigate(['new']);
+        return;
+      }
+
+      this.syncPrefix = this.room.name;
+      this.nodeId = this.room.id;
 
       if (!this.syncPrefix) {
         alert('Invalid sync prefix');
@@ -178,6 +190,12 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.typedMessage = '';
       this.scrollToBottom();
     });
+  }
+
+  leaveRoom() {
+    if (!confirm('Are you sure you want to leave this room?')) return;
+    this.trackerService.removeRoom(this.room);
+    this.router.navigate(['new']);
   }
 
   ngOnDestroy(): void {

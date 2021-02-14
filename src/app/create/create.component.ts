@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { TrackerService } from '../tracker.service';
 
 @Component({
   selector: 'app-create',
@@ -7,9 +8,23 @@ import { Component, OnInit } from '@angular/core';
 })
 export class CreateComponent implements OnInit {
 
-  constructor() { }
+  public newName: string = '';
+  public newId: string = '';
+
+  constructor(
+    public trackerService: TrackerService,
+  ) { }
 
   ngOnInit(): void {
+  }
+
+  join() {
+    const room = {
+      name: this.newName,
+      id: this.newId,
+    };
+    this.trackerService.addRoom(room);
+    this.trackerService.gotoRoom(room);
   }
 
 }

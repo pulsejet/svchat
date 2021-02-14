@@ -1,5 +1,11 @@
 <div class="outer">
-    <div class="title">{{ nodeId }} - {{ syncPrefix }}</div>
+    <div class="title">
+        <div class="head">
+            {{ syncPrefix }} ({{ nodeId }})
+        </div>
+        <div class="leave" (click)="leaveRoom()">Leave</div>
+    </div>
+
     <div class="chatbox" #scrollframe>
         <div *ngFor="let entry of messages" class="block" [class.self]="entry.nid === nodeId">
             <div class="inner-block" title="#{{ entry.seq }}">
@@ -11,6 +17,6 @@
 
     <div class="typingbox">
         <input class="type-box" [(ngModel)]="typedMessage" (keyup.enter)="sendMessage()" type="text">
-        <button class="send-button" (click)="sendMessage()">Send</button>
+        <button class="m-button send-button" (click)="sendMessage()">Send</button>
     </div>
 </div>

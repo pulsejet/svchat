@@ -1,1 +1,13 @@
-<p>create works!</p>
+<div class="outer">
+    <div class="heading">
+        Add Chatroom
+    </div>
+    <div class="entry">
+        Prefix (e.g. /ndn/chat): <br/>
+        <input class="labelled" [(ngModel)]="newName" type="text"> <br/>
+        Nickname (SVS identity): <br/>
+        <input class="labelled" [(ngModel)]="newId" type="text"> <br/>
+
+        <button class="m-button" (click)="join()">Join</button>
+    </div>
+</div>

@@ -1,8 +1,13 @@
-<div class="header">
-    StateVector Chat
-</div>
+<div class="outer">
+    <div class="header">
+        StateVector Chat
+    </div>
 
-<ul>
-    <li (click)="chooseRoom('/ndn/svs')">/ndn/svs</li>
-    <li (click)="chooseRoom('/ndn/one')">/ndn/one</li>
-</ul>
+    <ul>
+        <li *ngFor="let room of trackerService.getRooms()"
+            (click)="trackerService.gotoRoom(room)">
+            <b>{{ room.name }}</b> ({{ room.id }})
+        </li>
+        <li [routerLink]="['new']"><b>ADD ROOM +</b></li>
+    </ul>
+</div>

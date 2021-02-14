@@ -1,8 +1,16 @@
+.outer {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
 ul {
     font-size: 1.1em;
     word-wrap: break-word;
     cursor: pointer;
     padding: 0;
+    overflow-y: auto;
+    flex: 1;
 }
 
 li {

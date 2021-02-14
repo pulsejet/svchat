@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { TrackerService } from '../tracker.service';
 
 @Component({
   selector: 'app-chooser',
@@ -7,16 +8,17 @@ import { Router } from '@angular/router';
   styleUrls: ['./chooser.component.css']
 })
 export class ChooserComponent implements OnInit {
+  /** List of rooms currently active */
+  public rooms: {
+    name: string,
+    id: string,
+  }[] = [];
 
   constructor(
-    private router: Router,
+    public trackerService: TrackerService,
   ) { }
 
   ngOnInit(): void {
 
-  }
-
-  chooseRoom(room: string) {
-    this.router.navigate(['/chat', encodeURIComponent(room)]);
   }
 }

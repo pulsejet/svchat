@@ -4,3 +4,28 @@ body {
     padding: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
+
+input[type=text], .m-button {
+    padding: 6px 6px;
+    margin: 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    box-sizing: border-box;
+    font-size: 1em;
+    outline: none;
+}
+
+.m-button {
+    cursor: pointer;
+    background-color: #3700BB;
+    color: white;
+}
+
+input[type=text].labelled {
+    margin: 6px 0;
+}
+
+input[type=text] {
+    padding-left: 12px;
+}
