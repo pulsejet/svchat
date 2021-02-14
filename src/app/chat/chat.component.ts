@@ -86,6 +86,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       id: this.nodeId,
       update: updateCallback,
       syncKey: fromHex("74686973206973206120736563726574206d657373616765"),
+      cacheAll: true,
     });
   }
 
@@ -115,7 +116,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   sendMessage() {
     if (!this.typedMessage) return;
     this.sock?.publishData(new TextEncoder().encode(this.typedMessage), 4000);
-    this.newMessage(this.nodeId, this.typedMessage, (<Socket>this.sock).getLogic().getSeqNo());
+    this.newMessage(this.nodeId, this.typedMessage, (<Socket>this.sock).m_logic.getSeqNo());
     this.typedMessage = '';
   }
 
