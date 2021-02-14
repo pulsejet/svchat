@@ -4,9 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FwFace } from '@ndn/fw';
 import { Name } from "@ndn/packet";
 import { fromHex } from "@ndn/tlv";
-import { enableNfdPrefixReg } from "@ndn/nfdmgmt";
 
-import { WsTransport } from "@ndn/ws-transport";
 import { Socket, VersionVector } from 'ndnts-svs';
 
 import { DataInterface, DexieDataStore, StoreEntry } from '../dexie-store';
@@ -63,17 +61,12 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   private async startRoom() {
     // Close any existing chat
-    this.face?.close();
+    this.sock?.close();
     this.messages = [];
     this.typedMessage = '';
 
-    // Connect to websocket transport
-    const face = await WsTransport.createFace({}, "ws://localhost:9696");
-    this.face = face;
-    console.warn('Connected to NFD successfully!');
-
-    // Enable prefix registration
-    enableNfdPrefixReg(face);
+    // Get connection to NFD
+    this.face = await this.trackerService.getFace();
 
     // Sync prefix
     const prefix = new Name(this.syncPrefix);
@@ -88,10 +81,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     // Missing data callback
     const updateCallback = (missingData) => {
       // Store the version vector
-      this.store.db.table('meta').put({
-        key: 'vv',
-        blob: this.sock.m_logic.m_vv.encodeToComponent().tlv,
-      }, 'vv');
+      this.storeVersionVector(this.sock.m_logic.m_vv);
 
       // For each node
       for (const m of missingData) {
@@ -126,7 +116,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     // Start SVS socket
     this.sock = new Socket({
-      face: face,
+      face: this.face,
       prefix: prefix,
       id: this.nodeId,
       update: updateCallback,
@@ -189,6 +179,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.newMessage(DataInterface.parseData(data));
       this.typedMessage = '';
       this.scrollToBottom();
+      this.storeVersionVector(this.sock.m_logic.m_vv);
     });
   }
 
@@ -198,7 +189,14 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.router.navigate(['new']);
   }
 
+  storeVersionVector(vv: VersionVector) {
+    this.store.db.table('meta').put({
+      key: 'vv',
+      blob: vv.encodeToComponent().tlv,
+    }, 'vv');
+  }
+
   ngOnDestroy(): void {
-    this.face?.close();
+    this.sock?.close();
   }
 }
