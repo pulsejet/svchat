@@ -1,11 +1,15 @@
 import { Component, OnDestroy, OnInit, ChangeDetectorRef, ElementRef, ViewChild } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+
 import { FwFace } from '@ndn/fw';
 import { Name } from "@ndn/packet";
 import { fromHex } from "@ndn/tlv";
 import { enableNfdPrefixReg } from "@ndn/nfdmgmt";
+
 import { WsTransport } from "@ndn/ws-transport";
-import { Socket } from 'ndnts-svs';
-import { ActivatedRoute } from '@angular/router';
+import { Socket, VersionVector } from 'ndnts-svs';
+
+import { ForageDataStore } from '../forage-store';
 
 @Component({
   selector: 'app-chat',
@@ -13,8 +17,9 @@ import { ActivatedRoute } from '@angular/router';
   styleUrls: ['./chat.component.css']
 })
 export class ChatComponent implements OnInit, OnDestroy {
-  face: FwFace | null = null;
-  sock: Socket | null = null;
+  private face: FwFace | null = null;
+  private sock: Socket | null = null;
+  private forageStore?: ForageDataStore;
 
   public syncPrefix: string = '';
   public nodeId = 'dog';
@@ -65,19 +70,35 @@ export class ChatComponent implements OnInit, OnDestroy {
     // Sync prefix
     const prefix = new Name(this.syncPrefix);
 
+    // Fetch data for a node
+    const fetchData = (nid: string, seq: number) => {
+      this.sock?.fetchData(nid, seq).then((data) => {
+        const msg = new TextDecoder().decode(data.content);
+        this.newMessage(nid, msg, seq);
+      }).catch(console.error);
+    };
+
     // Missing data callback
     const updateCallback = (missingData) => {
+      // Store the version vector
+      this.forageStore.store.setItem('vv', this.sock.m_logic.m_vv.encodeToComponent().tlv);
+
       // For each node
       for (const m of missingData) {
         // Fetch at most last five messages
         for (let i = Math.max(m.high - 5, m.low); i <= m.high; i++) {
-          this.sock?.fetchData(m.session, i).then((data) => {
-            const msg = new TextDecoder().decode(data.content);
-            this.newMessage(m.session, msg, i);
-          }).catch(console.error);
+          fetchData(m.session, i);
         }
       }
     };
+
+    // Set up data store
+    this.forageStore = new ForageDataStore(this.syncPrefix);
+
+    // Get the version vector
+    let initialVV: VersionVector = undefined;
+    const vvWire: Uint8Array = await this.forageStore.store.getItem('vv');
+    if (vvWire) initialVV = VersionVector.from(vvWire);
 
     // Start SVS socket
     this.sock = new Socket({
@@ -86,8 +107,19 @@ export class ChatComponent implements OnInit, OnDestroy {
       id: this.nodeId,
       update: updateCallback,
       syncKey: fromHex("74686973206973206120736563726574206d657373616765"),
+      dataStore: this.forageStore,
       cacheAll: true,
+      initialVersionVector: initialVV,
     });
+
+    // Get all existing data
+    if (initialVV) {
+      for (const n of initialVV.getNodes()) {
+        for (let i = 1; i <= initialVV.get(n); i++) {
+          fetchData(n, i);
+        }
+      }
+    }
   }
 
   private isUserNearBottom(scrollContainer: any): boolean {
