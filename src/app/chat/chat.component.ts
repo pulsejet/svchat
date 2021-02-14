@@ -74,7 +74,7 @@ export class ChatComponent implements OnInit, OnDestroy {
           this.sock?.fetchData(m.session, i).then((data) => {
             const msg = new TextDecoder().decode(data.content);
             this.newMessage(m.session, msg, i);
-          }).catch(() => {});
+          }).catch(console.error);
         }
       }
     };
