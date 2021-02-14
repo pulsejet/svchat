@@ -120,7 +120,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       prefix: prefix,
       id: this.nodeId,
       update: updateCallback,
-      syncKey: fromHex("74686973206973206120736563726574206d657373616765"),
+      syncKey: new TextEncoder().encode(this.room.secret),
       dataStore: this.store,
       cacheAll: true,
       initialVersionVector: initialVV,

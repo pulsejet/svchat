@@ -7,6 +7,7 @@ import { enableNfdPrefixReg } from "@ndn/nfdmgmt";
 export interface ChatRoomInfo {
   name: string;
   id: string;
+  secret: string;
 }
 
 @Injectable({
