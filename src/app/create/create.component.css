@@ -1,19 +1,9 @@
-.outer {
+.entry {
     position: absolute;
     top: 40%; left: 50%;
     transform: translate(-50%, -50%);
-}
-
-.heading {
-    font-size: 1.4em;
-    width: 100%;
-    text-align: center;
-    padding: 20px;
-    box-sizing: border-box;
-    font-weight: bold;
-}
-
-.entry {
+    width: 80%;
+    max-width: 350px;
     font-size: 1.2em;
     padding: 20px;
     background-color: rgb(245, 245, 245);

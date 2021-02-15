@@ -1,33 +1,3 @@
-.outer {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
-.title {
-    width: 100%;
-    height: 60px;
-    padding: 15px;
-    box-sizing: border-box;
-    background-color: #3700BB;
-    color: white;
-    box-shadow: 0 0px 10px -5px black;
-    z-index: 150;
-    display: flex;
-}
-
-.title .head {
-    text-align: center;
-    font-size: 1.1em;
-    font-weight: bold;
-    flex: 1
-}
-
-.title .leave {
-    font-size: 1em;
-    cursor: pointer;
-}
-
 .chatbox {
     position: relative;
     padding: 10px;
