@@ -218,8 +218,11 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    window.removeEventListener("beforeunload", this.closeCallback);
-    this.closeCallback();
+    if (this.closeCallback) {
+      window.removeEventListener("beforeunload", this.closeCallback);
+      this.closeCallback();
+    }
+
     setTimeout(() => {
       this.sock?.close();
     }, 1000);
