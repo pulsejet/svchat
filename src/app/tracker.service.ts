@@ -37,6 +37,10 @@ export class TrackerService {
     return this.face;
   }
 
+  closeFace() {
+    this.face?.close();
+  }
+
   getRooms(): ChatRoomInfo[] {
     if (!this.rooms) {
       this.rooms = JSON.parse(localStorage.getItem('rooms') || '[]');

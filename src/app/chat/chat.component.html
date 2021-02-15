@@ -7,10 +7,13 @@
     </div>
 
     <div class="chatbox" #scrollframe>
-        <div *ngFor="let entry of messages" class="block" [class.self]="entry.nid === nodeId">
+        <div *ngFor="let entry of messages" class="block"
+             [class.self]="entry.nid === nodeId"
+             [class.meta]="entry.metaMessage">
+
             <div class="inner-block" title="#{{ entry.seq }}">
                 <span class="sender">{{ entry.nid }}</span>
-                <span class="message">{{ entry.message }}</span>
+                <span class="message">{{ entry.message || entry.metaMessage }}</span>
             </div>
         </div>
     </div>

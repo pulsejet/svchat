@@ -31,6 +31,8 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   public messages: StoreEntry[] = [];
 
+  private closeCallback: any;
+
   constructor(
     private cdr: ChangeDetectorRef,
     private route: ActivatedRoute,
@@ -125,6 +127,24 @@ export class ChatComponent implements OnInit, OnDestroy {
       cacheAll: true,
       initialVersionVector: initialVV,
     });
+
+    // Publish initial message
+    this.sock?.publishData(DataInterface.makeData({
+      metaMsg: `entered the room`,
+    }), 4000).then((data) => {
+      this.newMessage(DataInterface.parseData(data));
+    });
+
+    // Make sure closing message is sent
+    this.closeCallback = (() => {
+      this.sock?.publishData(DataInterface.makeData({
+        metaMsg: `left the room`,
+      }), 4000).then((data) => {
+        this.newMessage(DataInterface.parseData(data));
+      }).catch();
+    }).bind(this);
+
+    window.addEventListener("beforeunload", this.closeCallback);
   }
 
   private isUserNearBottom(scrollContainer: any): boolean {
@@ -144,6 +164,8 @@ export class ChatComponent implements OnInit, OnDestroy {
     if (wasAtBottom) {
       this.scrollToBottom();
     }
+
+    this.storeVersionVector(this.sock.m_logic.m_vv);
   }
 
   insertEntry(e: StoreEntry) {
@@ -179,7 +201,6 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.newMessage(DataInterface.parseData(data));
       this.typedMessage = '';
       this.scrollToBottom();
-      this.storeVersionVector(this.sock.m_logic.m_vv);
     });
   }
 
@@ -197,6 +218,10 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.sock?.close();
+    window.removeEventListener("beforeunload", this.closeCallback);
+    this.closeCallback();
+    setTimeout(() => {
+      this.sock?.close();
+    }, 1000);
   }
 }

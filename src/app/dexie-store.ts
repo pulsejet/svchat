@@ -8,7 +8,8 @@ export interface StoreEntry {
     id?: number;
     name: string;
     blob?: Uint8Array;
-    message: string;
+    message?: string;
+    metaMessage?: string;
     time: number;
     nid: string;
     seq: number;
@@ -20,6 +21,7 @@ export class DataInterface {
         let msgObj = {
             m: msgJsonStr,
             t: 0,
+            mm: undefined,
         };
 
         try {
@@ -31,17 +33,19 @@ export class DataInterface {
         return {
             name: data.name.toString(),
             blob: Encoder.encode(data),
-            message: msgObj.m,
+            message: msgObj.m || undefined,
+            metaMessage: msgObj.mm || undefined,
             time: msgObj.t,
             nid: data.name.get(-2).text,
             seq: NNI.decode(data.name.get(-1).value),
         };
     }
 
-    public static makeData(opts: { msg: string }): Uint8Array {
+    public static makeData(opts: { msg?: string, metaMsg?: string }): Uint8Array {
         const obj = {
             m: opts.msg,
             t: new Date().getTime(),
+            mm: opts.metaMsg,
         };
         return new TextEncoder().encode(JSON.stringify(obj));
     }

@@ -76,6 +76,20 @@
     content: ": ";
 }
 
+.block.meta {
+    text-align: center;
+}
+.block.meta .inner-block {
+    background-color: transparent !important;
+    color: gray;
+    font-size: 0.8em;
+    padding: 3px;
+    max-width: 80%;
+}
+.block.meta .sender {
+    display: initial;
+}
+
 .typingbox {
     padding: 10px;
     box-sizing: border-box;
