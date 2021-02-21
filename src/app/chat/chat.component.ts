@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FwFace } from '@ndn/fw';
 import { Name } from "@ndn/packet";
 
-import { SocketShared, VersionVector } from 'ndnts-svs';
+import * as SVS from 'ndnts-svs';
 
 import { DataInterface, DexieDataStore, StoreEntry } from '../dexie-store';
 import { ChatRoomInfo, TrackerService } from '../tracker.service';
@@ -16,7 +16,7 @@ import { ChatRoomInfo, TrackerService } from '../tracker.service';
 })
 export class ChatComponent implements OnInit, OnDestroy {
   private face: FwFace | null = null;
-  private sock: SocketShared | null = null;
+  private sock: SVS.SocketShared | null = null;
   private store?: DexieDataStore;
 
   public syncPrefix: string;
@@ -96,9 +96,9 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.store = new DexieDataStore(this.syncPrefix);
 
     // Get the version vector
-    let initialVV: VersionVector = undefined;
+    let initialVV: SVS.VersionVector = undefined;
     const vvWire = await this.store.db.table('meta').get('vv');
-    if (vvWire) initialVV = VersionVector.from(vvWire.blob);
+    if (vvWire) initialVV = SVS.VersionVector.from(vvWire.blob);
 
     // Get last few messages
     if (initialVV) {
@@ -115,14 +115,20 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.scrollToBottom();
     }
 
+    // Security options
+    const securityOptions: SVS.SecurityOptions = {
+      interestSignatureType: "HMAC",
+      hmacKey: new TextEncoder().encode(this.room.secret),
+    }
+
     // Start SVS socket
-    this.sock = new SocketShared({
+    this.sock = new SVS.SocketShared({
       face: this.face,
       syncPrefix: new Name(prefix).append('s'),
       dataPrefix: new Name(prefix).append('d'),
       id: this.nodeId,
       update: updateCallback,
-      syncKey: new TextEncoder().encode(this.room.secret),
+      security: securityOptions,
       dataStore: this.store,
       cacheAll: true,
       initialVersionVector: initialVV,
@@ -210,7 +216,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.router.navigate(['new']);
   }
 
-  storeVersionVector(vv: VersionVector) {
+  storeVersionVector(vv: SVS.VersionVector) {
     this.store.db.table('meta').put({
       key: 'vv',
       blob: vv.encodeToComponent().tlv,
