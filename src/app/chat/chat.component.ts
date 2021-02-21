@@ -3,9 +3,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { FwFace } from '@ndn/fw';
 import { Name } from "@ndn/packet";
-import { fromHex } from "@ndn/tlv";
 
-import { Socket, VersionVector } from 'ndnts-svs';
+import { SocketShared, VersionVector } from 'ndnts-svs';
 
 import { DataInterface, DexieDataStore, StoreEntry } from '../dexie-store';
 import { ChatRoomInfo, TrackerService } from '../tracker.service';
@@ -17,7 +16,7 @@ import { ChatRoomInfo, TrackerService } from '../tracker.service';
 })
 export class ChatComponent implements OnInit, OnDestroy {
   private face: FwFace | null = null;
-  private sock: Socket | null = null;
+  private sock: SocketShared | null = null;
   private store?: DexieDataStore;
 
   public syncPrefix: string;
@@ -117,9 +116,10 @@ export class ChatComponent implements OnInit, OnDestroy {
     }
 
     // Start SVS socket
-    this.sock = new Socket({
+    this.sock = new SocketShared({
       face: this.face,
-      prefix: prefix,
+      syncPrefix: new Name(prefix).append('s'),
+      dataPrefix: new Name(prefix).append('d'),
       id: this.nodeId,
       update: updateCallback,
       syncKey: new TextEncoder().encode(this.room.secret),
