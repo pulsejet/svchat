@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { FwFace } from '@ndn/fw';
 import { Name } from "@ndn/packet";
+import { createSigner, createVerifier, HMAC } from "@ndn/keychain";
 
 import * as SVS from 'ndnts-svs';
 
@@ -16,7 +17,7 @@ import { ChatRoomInfo, TrackerService } from '../tracker.service';
 })
 export class ChatComponent implements OnInit, OnDestroy {
   private face: FwFace | null = null;
-  private sock: SVS.SocketShared | null = null;
+  private sock: SVS.SVSyncShared | null = null;
   private store?: DexieDataStore;
 
   public syncPrefix: string;
@@ -82,7 +83,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     // Missing data callback
     const updateCallback = (missingData) => {
       // Store the version vector
-      this.storeVersionVector(this.sock.m_logic.m_vv);
+      this.storeVersionVector(this.sock.m_core.m_vv);
 
       // For each node
       for (const m of missingData) {
@@ -115,14 +116,18 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.scrollToBottom();
     }
 
+    const sKey = await HMAC.cryptoGenerate({
+      importRaw: new TextEncoder().encode(this.room.secret),
+    }, true);
+
     // Security options
     const securityOptions: SVS.SecurityOptions = {
-      interestSignatureType: "HMAC",
-      hmacKey: new TextEncoder().encode(this.room.secret),
+      syncInterestSigner: createSigner(HMAC, sKey),
+      syncInterestVerifier: createVerifier(HMAC, sKey),
     }
 
     // Start SVS socket
-    this.sock = new SVS.SocketShared({
+    this.sock = new SVS.SVSyncShared({
       face: this.face,
       syncPrefix: new Name(prefix).append('s'),
       dataPrefix: new Name(prefix).append('d'),
@@ -171,7 +176,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.scrollToBottom();
     }
 
-    this.storeVersionVector(this.sock.m_logic.m_vv);
+    this.storeVersionVector(this.sock.m_core.m_vv);
   }
 
   insertEntry(e: StoreEntry) {
