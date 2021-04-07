@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "prod": "ng build --prod",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e"
@@ -25,7 +26,7 @@
     "@ndn/nfdmgmt": "https://ndnts-nightly.ndn.today/nfdmgmt.tgz",
     "@ndn/ws-transport": "https://ndnts-nightly.ndn.today/ws-transport.tgz",
     "dexie": "^3.0.3",
-    "ndnts-svs": "file:../ndnts-svs",
+    "ndnts-svs": "^1.1.0",
     "rxjs": "~6.6.0",
     "tslib": "^2.0.0",
     "zone.js": "~0.11.3"
