@@ -11,7 +11,7 @@ export class CreateComponent implements OnInit {
   public newName: string = '';
   public newId: string = '';
   public newSecret: string = 'this is a secret message';
-  public newRouter: string = `ws://${window.location.hostname}:9696`;
+  public newNFD: string = `ws://${window.location.hostname}:9696`;
 
   constructor(
     public trackerService: TrackerService,
@@ -25,7 +25,7 @@ export class CreateComponent implements OnInit {
       name: this.newName,
       id: this.newId,
       secret: this.newSecret,
-      router: this.newRouter,
+      nfd: this.newNFD,
     };
     this.trackerService.addRoom(room);
     this.trackerService.gotoRoom(room);

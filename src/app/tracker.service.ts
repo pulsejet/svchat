@@ -8,7 +8,7 @@ export interface ChatRoomInfo {
   name: string;
   id: string;
   secret: string;
-  router: string;
+  nfd: string;
 }
 
 @Injectable({
@@ -26,20 +26,20 @@ export class TrackerService {
     this.getFace = this.getFace.bind(this);
   }
 
-  async getFace(routerName: string): Promise<FwFace> {
-    if (this.faces[routerName]?.running) return this.faces[routerName];
+  async getFace(nfd: string): Promise<FwFace> {
+    if (this.faces[nfd]?.running) return this.faces[nfd];
 
-    this.faces[routerName] = await WsTransport.createFace({}, routerName);
-    console.warn('Connected to NFD successfully!', routerName);
+    this.faces[nfd] = await WsTransport.createFace({}, nfd);
+    console.warn('Connected to NFD successfully!', nfd);
 
     // Enable prefix registration
-    enableNfdPrefixReg(this.faces[routerName]);
+    enableNfdPrefixReg(this.faces[nfd]);
 
-    return this.faces[routerName];
+    return this.faces[nfd];
   }
 
-  closeFace(routerName: string) {
-    this.faces[routerName]?.close();
+  closeFace(nfd: string) {
+    this.faces[nfd]?.close();
   }
 
   getRooms(): ChatRoomInfo[] {
