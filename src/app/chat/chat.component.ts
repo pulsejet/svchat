@@ -68,7 +68,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.typedMessage = '';
 
     // Get connection to NFD
-    this.face = await this.trackerService.getFace();
+    this.face = await this.trackerService.getFace(this.room.router);
 
     // Sync prefix
     const prefix = new Name(this.syncPrefix);
